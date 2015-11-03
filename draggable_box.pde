@@ -11,7 +11,7 @@ void setup() {
   // Create and align a box array
   boxes = new Box[num];
   for (int i = 0; i < num; i++) {
-    boxes[i] = new Box(200, i * (distance + size), size, size);
+    boxes[i] = new Box(200 + i * (distance + size), 200, size, size);
   }
 }
 
