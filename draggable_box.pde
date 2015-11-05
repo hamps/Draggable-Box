@@ -1,6 +1,6 @@
 float preX;
 float preY;
-Box[] boxes;
+BoxList boxList;
 
 void setup() { 
   size(1345, 679);
@@ -8,17 +8,17 @@ void setup() {
   int num = 8;
   float size = 80;
   float distance = 10;
-  // Create and align a box array
-  boxes = new Box[num];
+  float margin = 200;
+  boxList = new BoxList(num);
   for (int i = 0; i < num; i++) {
-    boxes[i] = new Box(200 + i * (distance + size), 200, size, size);
+    boxList.add(new Box(margin + i * (size + distance), margin, size, size));
   }
 }
 
 void draw() {
   background(255);
-  for (int i = 0; i < boxes.length; i++) {
-    boxes[i].checkOver(mouseX, mouseY);
+  while (boxList.hasNext()) {
+    boxList.next().checkOver(mouseX, mouseY);
   }
 }
 
@@ -38,7 +38,7 @@ class Box {
     display();
   }
   
-  void checkOver(float cx, float cy) {
+  public void checkOver(float cx, float cy) {
     if (cx > bx && cx < bx + bWidth && cy > by && cy < by + bHeight) {
       over = true;
       if (locked) {
@@ -56,7 +56,7 @@ class Box {
     }
   }
   
-  void move(float mx, float my) {
+  public void move(float mx, float my) {
     bx += mx;
     by += my;
   }
@@ -66,28 +66,62 @@ class Box {
   }
 }
 
+class BoxList {
+  private Box[] boxes;
+  private int last = 0;
+  private int index = 0;
+  
+  BoxList(int boxCount) {
+    boxes = new Box[boxCount];
+  }
+  
+  public void add(Box box) {
+    boxes[last] = box;
+    last++;
+  }
+  
+  public boolean hasNext() {
+    print(index);
+    if (index < last) {
+      return true;
+    } else {
+      index = 0;
+      return false;
+    }
+  }
+  
+  public Box next() {
+    Box box = boxes[index];
+    index++;
+    return box;
+  }
+}
+
 void mousePressed() {
-  for (int i = 0; i < boxes.length; i++) {
-    if (boxes[i].over) {
+  while (boxList.hasNext()) {
+    Box box = boxList.next();
+    if (box.over) {
       preX = mouseX;
       preY = mouseY;
-      boxes[i].locked = true;
+      box.locked = true;
     }
   }
 }
 
 void mouseReleased() {
-  for (int i = 0; i < boxes.length; i++) {
-    if (boxes[i].locked) {
-      boxes[i].locked = false;
+  while (boxList.hasNext()) {
+    Box box = boxList.next();
+    if (box.locked) {
+      box.locked = false;
     }
   }
 }
 
 void mouseDragged() {
-  for (int i = 0; i < boxes.length; i++) {
-    if (boxes[i].over && boxes[i].locked) {
-      boxes[i].move(mouseX - preX, mouseY - preY);
+  while (boxList.hasNext()) {
+    Box box = boxList.next();
+    if (box.over && box.locked) {
+      box.move(mouseX - preX, mouseY - preY);
       preX = mouseX;
       preY = mouseY;
     }
